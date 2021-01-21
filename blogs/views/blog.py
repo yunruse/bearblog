@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.db.models import Count
 
 from blogs.models import Blog, Hit, Post, Upvote
-from blogs.helpers import get_nav, get_post, get_posts, unmark, root as get_root
+from blogs.helpers import get_post, get_posts, unmark, root as get_root
 
 from ipaddr import client_ip
 from taggit.models import Tag
@@ -48,7 +48,6 @@ def home(request):
             'blog': blog,
             'content': blog.content,
             'posts': get_posts(all_posts),
-            'nav': get_nav(all_posts),
             'root': address_info['root'],
             'meta_description': unmark(blog.content)[:160]
         })
@@ -82,7 +81,6 @@ def posts(request):
         {
             'blog': blog,
             'posts': get_posts(all_posts),
-            'nav': get_nav(all_posts),
             'root': address_info['root'],
             'meta_description':  unmark(blog.content)[:160],
             'tags': tags,
@@ -129,7 +127,6 @@ def post(request, slug):
             'blog': blog,
             'content': post.content,
             'post': post,
-            'nav': get_nav(all_posts),
             'root': address_info['root'],
             'meta_description': unmark(post.content)[:160],
             'upvoted': upvoted

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from .models import Blog, Post, Upvote, Hit
+from .models import Blog, Post, Upvote, Hit, NavItem
 from django.utils.html import escape, format_html
 from blogs.helpers import add_email_address, delete_domain, root
 from django.urls import reverse
@@ -74,7 +74,7 @@ class BlogAdmin(admin.ModelAdmin):
     search_fields = ('title', 'subdomain', 'domain', 'user__email')
     ordering = ('-created_date',)
 
-    actions = ['approve_blog', 'block_blog']
+    actions = ['approve_blog', 'block_blog', 'migrate_is_in_nav']
 
     def approve_blog(self, request, queryset):
         queryset.update(reviewed=True)
@@ -94,6 +94,17 @@ class BlogAdmin(admin.ModelAdmin):
     block_blog.short_description = "Block selected blogs"
 
 
+    def migrate_is_in_nav(self, request, queryset):
+        pages = Post.objects.filter(is_page=True)
+        for page in pages:
+            new_navitem = NavItem()
+            new_navitem.blog = page.blog
+            new_navitem.label = page.title
+            new_navitem.link = f"/{page.slug}/"
+            new_navitem.save()
+    
+    migrate_is_in_nav.short_description = "Migrate is in nav"
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
@@ -110,6 +121,7 @@ class PostAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Upvote)
+admin.site.register(NavItem)
 
 
 @admin.register(Hit)
